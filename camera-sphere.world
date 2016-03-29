@@ -11,87 +11,125 @@
       <uri>model://sun</uri>
     </include>
     
-
+	<!-- Pan-Tilt Unit -->
    <model name ='camera_unit'>
-     <pose>-0 0 0 0 0 0</pose>
-     <link name ='base'>
-       <pose>0 0 0.1 0 0 0</pose>
-       <!--<pose>0 0.01 2.5 0 0 0</pose>-->
-       <collision name ='base_collision'>
-         <geometry>
-           <box><size>0.2 0.2 0.2</size></box>
-         </geometry>
-       </collision>
-       <visual name ='base_visual'>
-         <geometry>
-           <box><size>0.2 0.2 0.2</size></box>
-         </geometry>
-         <material>
-         </material>
-       </visual>
-      </link>
-     <link name = 'pan'>
-	<pose>0 0 0.4 0 0 0</pose>
-	<collision name ='pan_collision'>
-         <geometry>
-           <box><size>0.2 0.2 0.5</size></box>
-         </geometry>
+	<static>false</static>
+	<pose>0 0 0 0 0 0</pose>
+	<!-- Pan Unit --> 
+	<link name = 'pan'>
+		<pose>0 0 0 0 0 0</pose>
+		<inertial>
+			 <mass>100.0</mass>
+		</inertial>
+		<visual name ='pan_visual'>
+			<pose>0 0 0.02 0 0 0</pose> <!-- halfway up --> 
+			<geometry>
+				<box><size>0.05 0.032 0.04</size></box> <!-- dimensions of dynamixel actuator -->
+			</geometry>
+		</visual>
+		<collision name ='pan_collision'>
+			<pose>0 0 0.02 0 0 0</pose>
+			<geometry>
+				<box><size>0.05 0.032 0.04</size></box>
+			</geometry>
         </collision> 
-	<visual name ='pan_visual'>
-         <geometry>
-           <box><size>0.2 0.2 0.5</size></box>
-         </geometry>
-       </visual>
-     </link>
-     <joint type = "revolute" name = "base_pan">
-        <pose>0 0 0.4 0 0 0</pose>
-	<child>pan</child>
-	<parent>base</parent>
-	<axis>
-	  <xyz>0 0 1</xyz>
-	</axis>
-     </joint>
-     <link name = 'tilt'>
-	<pose>0 0 0.8 0 0 0</pose>
-	<collision name ='tilt_collision'>
-         <geometry>
-           <box><size>0.4 0.4 0.1</size></box>
-         </geometry>
+    </link>
+    <link name = 'tilt'>
+		<pose>0.0125 0 0.045 0 0 0</pose> <!-- 0.025 + 0.02 -->
+		<inertial> 
+			<mass>10.0</mass>
+		</inertial>
+		<collision name ='tilt_collision'>
+			<pose>0 0 0.025 0 0 0</pose>
+			<geometry>
+				<box><size>0.04 0.032 0.05</size></box>
+			</geometry>
         </collision> 
-	<visual name ='tilt_visual'>
-         <geometry>
-           <box><size>0.4 0.4 0.3</size></box>
-         </geometry>
-       </visual>
-     </link>
-     <joint type = "revolute" name = "pan_tilt">
-        <pose>0 0 1 0 0 0</pose>
-	<child>tilt</child>
-	<parent>pan</parent>
-	<axis>
-	  <xyz>0 1 0</xyz>
-	</axis>
-     </joint>
+		<visual name ='tilt_visual'>
+			<pose>0 0 0.025 0 0 0</pose>
+			<geometry>
+				<box><size>0.04 0.032 0.05</size></box>
+			</geometry>
+		</visual>
+    </link>
+	<joint type = "revolute" name = "pan_tilt">
+	        <pose>0.0125 0 0.045 0 0 0</pose>
+			<parent>pan</parent>
+			<child>tilt</child>
+			<axis>
+				<xyz>0 0 1</xyz>
+			</axis>
+	</joint>
+	<!-- Camera Link -->
    <link name = 'camera'>
-    <include>
-      <uri>model://camera</uri>
-      <pose>0 0 1 0 0 0</pose>
-    </include>
-   </link>
-    <joint name="camera_tilt" type="revolute">
-      <child>camera</child>
-      <parent>tilt</parent>
-      <axis>
-        <xyz>0 0 1</xyz>
-        <limit>
-          <upper>0</upper>
-          <lower>0</lower>
-        </limit>
-      </axis>
-    </joint>
+		<pose>0.0125 0 0.12 0 0 0</pose> <!-- 0.05+0.04 -->
+		<inertial>
+			<mass>1.0</mass>
+		</inertial>
+		<visual name="camera_visual">
+			<pose>0 0 0 0 0 0</pose>
+			<geometry>
+				<sphere><radius>0.016</radius></sphere> <!-- 0.032/2 -->
+			</geometry>
+       	    	</visual>
+        	<collision name="camera_collision">
+			<pose>0 0 0 0 0 0</pose>
+			<geometry>
+				<sphere><radius>0.016</radius></sphere>
+			</geometry>
+ 	       </collision>
+		<!-- Camera Sensor -->
+		<sensor type = "camera" name = "camera">
+			<pose>0.0125 0 0.12 0 0 0</pose>
+			<camera>
+				<horizontal_fov>1.047</horizontal> <!-- to match the camera of project 3 -->
+				<image>
+					<width>320</width>
+					<height>240</height>
+				</image>
+				<clip>
+					<near>0.1</near>
+					<far>100</far>
+				</clip>
+			</camera>
+			<always_on>1</always_on>
+			<update_rate>10</update_rate>
+			<visualize>true</visualize>
+			<plugin name='camera_dump' filename='build/libcamera_dump.so' />
+		</sensor>
+       </link>
+       <joint type="revolute" name="camera_tilt">
+		<pose>0 0 0.126 0 0 0</pose> <!-- 0.09+0.016 -->
+		<parent>tilt</parent>
+		<child>camera</child>
+		<axis>
+			<xyz>0 1 0</xyz>
+		</axis>
+       </joint>
+      <plugin name="camera_sphere" filename="build/libcamera_sphere.so">
+        <pan_unit>pan_tilt</pan_unit>
+        <tilt_unit>camera_tilt</tilt_unit>
+      </plugin>
    </model>
 
-
+<!-- sphere to be tracked -->
+   <model name = "sphere_tracked">
+		<pose>1 0 0.5 0 0 0</pose>
+		<link name = "sphere">
+			<visual name = "sphere_visual">
+				<geometry>
+					<sphere><radius>0.25</radius></sphere>
+				</geometry>
+				<material>
+					<ambient>0 0 1 1</ambient>
+					<diffuse>0 0 1 1</diffuse>
+					<specular>0.1 0.1 0.1 1</specular>
+					<emissive>0 0 0 0</emissive>
+				</material>
+			</visual>
+		</link>
+	<static>true</static>
+   </model>
 
 <!-- Light Source -->
         <light type="directional" name="sun">
